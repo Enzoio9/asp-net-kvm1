@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ollama Web - AI Video Generator</title>
     <link rel="stylesheet" href="/src/styles/main.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <div id="app">
         <!-- Header -->
         <header class="header">
             <div class="container">
-                <h1 class="logo">🎬 Ollama Web</h1>
+                <h1 class="logo"><i class="fa-solid fa-film"></i> Ollama Web</h1>
                 <nav class="nav">
-                    <a href="#create" class="nav-link">Create</a>
-                    <a href="#gallery" class="nav-link">Gallery</a>
-                    <a href="#docs" class="nav-link">API</a>
+                    <a href="#create" class="nav-link"><i class="fa-solid fa-plus"></i> Create</a>
+                    <a href="#gallery" class="nav-link"><i class="fa-solid fa-image"></i> Gallery</a>
+                    <a href="#docs" class="nav-link"><i class="fa-solid fa-book"></i> API</a>
                 </nav>
             </div>
         </header>
@@ -25,7 +27,7 @@
             <!-- Create Section -->
             <section id="create" class="section create-section">
                 <div class="container">
-                    <h2 class="section-title">Create New Video</h2>
+                    <h2 class="section-title"><i class="fa-solid fa-video"></i> Create New Video</h2>
                     
                     <form id="createForm" class="create-form">
                         <div class="form-group">
@@ -61,8 +63,8 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">
-                            <span class="btn-text">Generate Video</span>
-                            <span class="btn-loader" style="display: none;">Creating...</span>
+                            <span class="btn-text"><i class="fa-solid fa-gear"></i> Generate Video</span>
+                            <span class="btn-loader" style="display: none;"><i class="fa-solid fa-spinner fa-spin"></i> Creating...</span>
                         </button>
                     </form>
 
@@ -76,7 +78,7 @@
             <!-- Gallery Section -->
             <section id="gallery" class="section gallery-section">
                 <div class="container">
-                    <h2 class="section-title">Video Gallery</h2>
+                    <h2 class="section-title"><i class="fa-solid fa-images"></i> Video Gallery</h2>
                     <div id="videoGrid" class="video-grid">
                         <!-- Videos will be inserted here -->
                     </div>
@@ -86,10 +88,10 @@
             <!-- API Docs Section -->
             <section id="docs" class="section docs-section">
                 <div class="container">
-                    <h2 class="section-title">API Documentation</h2>
+                    <h2 class="section-title"><i class="fa-solid fa-book-open"></i> API Documentation</h2>
                     <div class="api-docs">
                         <div class="api-endpoint">
-                            <h3>Create Job</h3>
+                            <h3><i class="fa-solid fa-plus"></i> Create Job</h3>
                             <code>POST /api/v1/jobs</code>
                             <pre>{
   "prompt": "string",
@@ -100,17 +102,17 @@
                         </div>
 
                         <div class="api-endpoint">
-                            <h3>List Jobs</h3>
+                            <h3><i class="fa-solid fa-list"></i> List Jobs</h3>
                             <code>GET /api/v1/jobs</code>
                         </div>
 
                         <div class="api-endpoint">
-                            <h3>Get Job</h3>
+                            <h3><i class="fa-solid fa-eye"></i> Get Job</h3>
                             <code>GET /api/v1/jobs/{id}</code>
                         </div>
 
                         <div class="api-endpoint">
-                            <h3>Cancel Job</h3>
+                            <h3><i class="fa-solid fa-xmark"></i> Cancel Job</h3>
                             <code>POST /api/v1/jobs/{id}/cancel</code>
                         </div>
                     </div>
@@ -121,7 +123,7 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="container">
-                <p>&copy; 2026 Ollama Web. Powered by AI.</p>
+                <p>&copy; 2026 Ollama Web</p>
             </div>
         </footer>
 
