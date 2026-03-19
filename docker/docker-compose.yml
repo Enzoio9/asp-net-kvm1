@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ollama-web:
     build:
@@ -26,8 +24,7 @@ services:
       - OLLAMA_MODEL=${OLLAMA_MODEL:-runway/gen2-lite}
     networks:
       - ollama-network
-    depends_on:
-      - caddy
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
