@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
 
 namespace OllamaWebApi;
 
@@ -108,7 +109,7 @@ public class JobQueueManager : IJobQueueManager, IDisposable
             }
 
             var jsonRequest = System.Text.Json.JsonSerializer.Serialize(requestData);
-            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+            var content = new StringContent(jsonRequest, Encoding.UTF8, new MediaTypeHeaderValue("application/json"));
 
             Console.WriteLine($"🚀 Sending request to Ollama: {ollamaHost}/api/generate");
             Console.WriteLine($"📊 Request size: {jsonRequest.Length} bytes");
