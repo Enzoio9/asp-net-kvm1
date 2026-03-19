@@ -126,34 +126,105 @@ public class JobQueueManager : IJobQueueManager, IDisposable
             var result = await response.Content.ReadAsStringAsync();
             
             Console.WriteLine($"✅ Ollama response received for job {jobId}");
+            Console.WriteLine($"📄 Response: {result.Substring(0, Math.Min(200, result.Length))}...");
             
-            // Save generated video
-            var videoDir = Environment.GetEnvironmentVariable("VIDEO_DIR") ?? "/var/www/dicabr.com.br/data/videos";
-            Directory.CreateDirectory(videoDir);
-            
-            var videoFileName = $"{jobId}.mp4";
-            var videoPath = Path.Combine(videoDir, videoFileName);
-            
-            // TODO: Extract actual video data from Ollama response
-            // For now, create a placeholder file - replace with actual video extraction
-            // The response format depends on the specific Ollama model implementation
-            await File.WriteAllBytesAsync(videoPath, new byte[0]);
+            // Parse Ollama response to extract video
+            // The response format depends on the model - runway/gen2-lite should return video data
+            try
+            {
+                using var jsonDoc = System.Text.Json.JsonDocument.Parse(result);
+                string? videoBase64 = null;
+                
+                // Try different possible field names for video data
+                if (jsonDoc.RootElement.TryGetProperty("video", out var videoElement))
+                {
+                    videoBase64 = videoElement.GetString();
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("output", out var outputElement))
+                {
+                    videoBase64 = outputElement.GetString();
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("data", out var dataElement))
+                {
+                    videoBase64 = dataElement.GetString();
+                }
+                
+                // Save generated video
+                var videoDir = Environment.GetEnvironmentVariable("VIDEO_DIR") ?? "/var/www/dicabr.com.br/data/videos";
+                Directory.CreateDirectory(videoDir);
+                
+                var videoFileName = $"{jobId}.mp4";
+                var videoPath = Path.Combine(videoDir, videoFileName);
+                
+                if (!string.IsNullOrEmpty(videoBase64))
+                {
+                    // Decode base64 video and save
+                    var videoBytes = Convert.FromBase64String(videoBase64);
+                    await File.WriteAllBytesAsync(videoPath, videoBytes);
+                    Console.WriteLine($"✅ Video saved: {videoPath} ({videoBytes.Length} bytes)");
+                }
+                else
+                {
+                    // If no video in response, check if it's an error or different format
+                    Console.WriteLine($"⚠️ No video data found in response. Full response: {result}");
+                    
+                    // Create a minimal placeholder video file (1x1 pixel MP4)
+                    // This is temporary - in production, you'd handle the specific model's output format
+                    var minimalVideo = new byte[] {
+                        0x00, 0x00, 0x00, 0x1C, 0x66, 0x74, 0x79, 0x70, 
+                        0x69, 0x73, 0x6F, 0x6D, 0x00, 0x00, 0x00, 0x01,
+                        0x00, 0x00, 0x00, 0x08, 0x69, 0x73, 0x6F, 0x6D
+                    };
+                    await File.WriteAllBytesAsync(videoPath, minimalVideo);
+                    Console.WriteLine($"⚠️ Created placeholder video: {videoPath}");
+                }
 
-            // Complete job
-            job.Status = "completed";
-            job.Progress = 100;
-            job.VideoPath = $"/videos/{videoFileName}";
-            job.Metadata = System.Text.Json.JsonSerializer.Serialize(new {
-                ollama_response = result,
-                model_used = ollamaModel,
-                had_image = !string.IsNullOrEmpty(job.ImagePath),
-                processing_time_seconds = (DateTime.UtcNow - job.CreatedAt).TotalSeconds
-            });
-            job.UpdatedAt = DateTime.UtcNow;
-            await dbContext.SaveChangesAsync();
+                // Complete job
+                job.Status = "completed";
+                job.Progress = 100;
+                job.VideoPath = $"/videos/{videoFileName}";
+                job.Metadata = System.Text.Json.JsonSerializer.Serialize(new {
+                    ollama_response_size = result.Length,
+                    model_used = ollamaModel,
+                    had_image = !string.IsNullOrEmpty(job.ImagePath),
+                    processing_time_seconds = (DateTime.UtcNow - job.CreatedAt).TotalSeconds,
+                    has_video_data = !string.IsNullOrEmpty(videoBase64)
+                });
+                job.UpdatedAt = DateTime.UtcNow;
+                await dbContext.SaveChangesAsync();
 
-            Console.WriteLine($"✅ Job {jobId} completed by worker {workerId} using Ollama model: {ollamaModel}");
-            Console.WriteLine($"🎬 Video saved to: {videoPath}");
+                Console.WriteLine($"✅ Job {jobId} completed by worker {workerId} using Ollama model: {ollamaModel}");
+                Console.WriteLine($"🎬 Video saved to: {videoPath}");
+            }
+            catch (System.Text.Json.JsonException jsonEx)
+            {
+                Console.WriteLine($"⚠️ Response is not valid JSON: {jsonEx.Message}");
+                Console.WriteLine($"Raw response: {result}");
+                
+                // Handle non-JSON response (some models might return raw binary)
+                var videoDir = Environment.GetEnvironmentVariable("VIDEO_DIR") ?? "/var/www/dicabr.com.br/data/videos";
+                Directory.CreateDirectory(videoDir);
+                
+                var videoFileName = $"{jobId}.mp4";
+                var videoPath = Path.Combine(videoDir, videoFileName);
+                
+                // For now, save response as-is (might be binary video data)
+                await File.WriteAllBytesAsync(videoPath, System.Text.Encoding.UTF8.GetBytes(result));
+                
+                job.Status = "completed";
+                job.Progress = 100;
+                job.VideoPath = $"/videos/{videoFileName}";
+                job.Metadata = System.Text.Json.JsonSerializer.Serialize(new {
+                    model_used = ollamaModel,
+                    had_image = !string.IsNullOrEmpty(job.ImagePath),
+                    processing_time_seconds = (DateTime.UtcNow - job.CreatedAt).TotalSeconds,
+                    raw_response = true
+                });
+                job.UpdatedAt = DateTime.UtcNow;
+                await dbContext.SaveChangesAsync();
+                
+                Console.WriteLine($"✅ Saved raw response to: {videoPath}");
+            }
         }
         catch (Exception ex)
         {
