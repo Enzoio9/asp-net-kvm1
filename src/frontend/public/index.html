@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ollama Web - AI Video Generator</title>
+    <title>Ollama Web - dicabr.com.br</title>
     <link rel="stylesheet" href="/src/styles/main.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -13,7 +13,7 @@
         <!-- Header -->
         <header class="header">
             <div class="container">
-                <h1 class="logo"><i class="fa-solid fa-film"></i> Ollama Web</h1>
+                <h1 class="logo"><i class="fa-solid fa-film"></i> Ollama Web - dicabr.com.br</h1>
                 <nav class="nav">
                     <a href="#create" class="nav-link"><i class="fa-solid fa-plus"></i> Create</a>
                     <a href="#gallery" class="nav-link"><i class="fa-solid fa-image"></i> Gallery</a>
@@ -29,7 +29,7 @@
                 <div class="container">
                     <h2 class="section-title"><i class="fa-solid fa-video"></i> Create New Video</h2>
                     
-                    <form id="createForm" class="create-form">
+                    <form id="createForm" class="create-form" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="prompt">Prompt</label>
                             <textarea 
@@ -39,6 +39,18 @@
                                 placeholder="Describe the video you want to create..."
                                 required
                             ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image">Upload Image (optional)</label>
+                            <input 
+                                type="file" 
+                                id="image" 
+                                name="image" 
+                                accept="image/*"
+                                class="file-input"
+                            />
+                            <small>Upload an image to use as reference for the video</small>
                         </div>
 
                         <div class="form-row">
@@ -63,7 +75,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">
-                            <span class="btn-text"><i class="fa-solid fa-gear"></i> Generate Video</span>
+                            <span class="btn-text"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Video from Prompt + Image</span>
                             <span class="btn-loader" style="display: none;"><i class="fa-solid fa-spinner fa-spin"></i> Creating...</span>
                         </button>
                     </form>

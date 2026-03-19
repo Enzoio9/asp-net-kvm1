@@ -61,17 +61,28 @@ class OllamaWebApp {
             btnLoader.style.display = 'inline';
 
             const formData = new FormData(form);
+            
+            // Get image file if selected
+            const imageFile = formData.get('image');
+            
             const jobData = {
                 prompt: formData.get('prompt'),
                 duration: parseInt(formData.get('duration')),
                 resolution: formData.get('resolution'),
-                style: formData.get('style') || undefined
+                style: formData.get('style') || undefined,
+                image: (imageFile && imageFile.size > 0) ? imageFile : null
             };
+
+            console.log('📷 Creating job with:', {
+                hasPrompt: !!jobData.prompt,
+                hasImage: !!jobData.image,
+                duration: jobData.duration
+            });
 
             // Create job
             const job = await this.api.createJob(jobData);
             
-            this.showNotification('Job created successfully!', 'success');
+            this.showNotification('Job created successfully! AI is generating your video...', 'success');
             
             // Add to active jobs
             this.activeJobs.set(job.id, job);

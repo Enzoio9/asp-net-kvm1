@@ -41,16 +41,24 @@ class OllamaAPI {
         }
     }
 
-    // Create a new video generation job
+    // Create a new video generation job with image upload
     async createJob(data) {
+        const formData = new FormData();
+        formData.append('prompt', data.prompt);
+        formData.append('duration', data.duration || 5);
+        formData.append('resolution', data.resolution || '720p');
+        if (data.style) formData.append('style', data.style);
+        
+        // Add image if provided
+        if (data.image) {
+            formData.append('image', data.image);
+        }
+
         return await this.request('jobs', {
             method: 'POST',
-            body: JSON.stringify({
-                prompt: data.prompt,
-                duration: data.duration || 5,
-                resolution: data.resolution || '720p',
-                style: data.style || null
-            })
+            body: formData,
+            // Don't set Content-Type header, browser will set it with boundary
+            headers: {}
         });
     }
 
