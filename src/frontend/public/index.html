@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama Web - AI Video Generator</title>
+    <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <h1 class="logo">🎬 Ollama Web</h1>
+                <nav class="nav">
+                    <a href="#create" class="nav-link">Create</a>
+                    <a href="#gallery" class="nav-link">Gallery</a>
+                    <a href="#docs" class="nav-link">API</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Create Section -->
+            <section id="create" class="section create-section">
+                <div class="container">
+                    <h2 class="section-title">Create New Video</h2>
+                    
+                    <form id="createForm" class="create-form">
+                        <div class="form-group">
+                            <label for="prompt">Prompt</label>
+                            <textarea 
+                                id="prompt" 
+                                name="prompt" 
+                                rows="4" 
+                                placeholder="Describe the video you want to create..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="duration">Duration (seconds)</label>
+                                <input type="number" id="duration" name="duration" min="1" max="60" value="5">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="resolution">Resolution</label>
+                                <select id="resolution" name="resolution">
+                                    <option value="480p">480p</option>
+                                    <option value="720p" selected>720p</option>
+                                    <option value="1080p">1080p</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="style">Style (optional)</label>
+                                <input type="text" id="style" name="style" placeholder="e.g., cinematic, anime, realistic">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Generate Video</span>
+                            <span class="btn-loader" style="display: none;">Creating...</span>
+                        </button>
+                    </form>
+
+                    <!-- Active Jobs -->
+                    <div id="activeJobs" class="active-jobs">
+                        <!-- Jobs will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gallery Section -->
+            <section id="gallery" class="section gallery-section">
+                <div class="container">
+                    <h2 class="section-title">Video Gallery</h2>
+                    <div id="videoGrid" class="video-grid">
+                        <!-- Videos will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- API Docs Section -->
+            <section id="docs" class="section docs-section">
+                <div class="container">
+                    <h2 class="section-title">API Documentation</h2>
+                    <div class="api-docs">
+                        <div class="api-endpoint">
+                            <h3>Create Job</h3>
+                            <code>POST /api/v1/jobs</code>
+                            <pre>{
+  "prompt": "string",
+  "duration": 5,
+  "resolution": "720p",
+  "style": "string"
+}</pre>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h3>List Jobs</h3>
+                            <code>GET /api/v1/jobs</code>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h3>Get Job</h3>
+                            <code>GET /api/v1/jobs/{id}</code>
+                        </div>
+
+                        <div class="api-endpoint">
+                            <h3>Cancel Job</h3>
+                            <code>POST /api/v1/jobs/{id}/cancel</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2026 Ollama Web. Powered by AI.</p>
+            </div>
+        </footer>
+
+        <!-- Notifications -->
+        <div id="notifications" class="notifications"></div>
+    </div>
+
+    <script src="/src/utils/api.js"></script>
+    <script src="/src/app.js"></script>
+</body>
+</html>
