@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace OllamaWebApi;
 
@@ -71,9 +73,12 @@ public class Program
         builder.Services.AddSingleton<IJobQueueManager, JobQueueManager>();
 
         // Configure Kestrel to listen on all network interfaces
+        var ports = Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS") ?? "8080";
+        int port = int.Parse(ports);
         builder.WebHost.ConfigureKestrel(options =>
         {
-            options.ListenAnyIP(5000); // Listen on all interfaces (IPv4 and IPv6)
+            options.ListenAnyIP(port); // Listen on all interfaces (IPv4 and IPv6)
+            Console.WriteLine($"🔌 Kestrel configured to listen on port {port}");
         });
 
         var app = builder.Build();
@@ -97,11 +102,48 @@ public class Program
             app.UseAuthorization();
         }
 
+        // Serve static files for /videos and /images paths
+        var videoDir = Environment.GetEnvironmentVariable("VIDEO_DIR") ?? 
+                      Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "videos");
+        var imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? 
+                      Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "images");
+        
+        // Ensure directories exist
+        Directory.CreateDirectory(videoDir);
+        Directory.CreateDirectory(imageDir);
+        
+        Console.WriteLine($"📁 Video directory: {videoDir}");
+        Console.WriteLine($"📁 Image directory: {imageDir}");
+        
+        // Map static file locations
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                imageDir),
+            RequestPath = "/images"
+        });
+        
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                videoDir),
+            RequestPath = "/videos"
+        });
+
         // Initialize database
         using (var scope = app.Services.CreateScope())
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            dbContext.Database.EnsureCreated();
+            try
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.EnsureCreated();
+                Console.WriteLine("✅ Database initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Database initialization error: {ex.Message}");
+                throw;
+            }
         }
 
         // Start job queue manager
