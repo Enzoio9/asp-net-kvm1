@@ -70,6 +70,12 @@ public class Program
         // Job Queue Manager
         builder.Services.AddSingleton<IJobQueueManager, JobQueueManager>();
 
+        // Configure Kestrel to listen on all network interfaces
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            options.ListenAnyIP(5000); // Listen on all interfaces (IPv4 and IPv6)
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
